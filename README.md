@@ -125,9 +125,7 @@ Provides:
 
 # **HDR_CLIPPING_CONNECTIONS**
 
-Example Clipping Features Produced
-
-Per video, the system outputs metrics such as:
+Example Clipping Features Produced Per video, the system outputs metrics such as:
 
 `{
   "clip_area_ratio_mean": 0.0213,
