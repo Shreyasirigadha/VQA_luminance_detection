@@ -1,54 +1,54 @@
-VQA with Luminance Clipping Detection (FUNQUE+ Extension)
+## **VQA with Luminance Clipping Detection (FUNQUE+ Extension)**
 
 This repository contains the implementation of a Full-Reference Video Quality Assessment (VQA) framework extended with HDR luminance / brightness clipping detection, built on top of the FUNQUE+ architecture.
 
 The project enhances perceptual video quality modeling by explicitly detecting highlight saturation and clipping artifacts in HDR (PQ-encoded) content, which are often ignored by traditional VQA metrics.
 
-##Project Motivation
+# **Project Motivation**
 
 Traditional VQA models such as SSIM, VMAF, and even FUNQUE+ primarily focus on structural fidelity and perceptual distortion, but do not explicitly capture HDR brightness clipping artifacts.
 
 This project introduces:
 
-A dedicated HDR luminance clipping feature module
+- A dedicated HDR luminance clipping feature module
 
-PQ-domain luminance analysis
+- PQ-domain luminance analysis
 
-Frame-level blob detection for saturated highlights
+- Frame-level blob detection for saturated highlights
 
-Video-level aggregation of clipping severity
+- Video-level aggregation of clipping severity
 
-The result is a more perceptually aligned quality representation for HDR content.
+- The result is a more perceptually aligned quality representation for HDR content.
 
 
-##PROJECT_ANALYSIS
+# **PROJECT_ANALYSIS**
 
-Key Features
+*Key Features*
 
-Full-reference VQA pipeline (built on FUNQUE+ architecture)
+- Full-reference VQA pipeline (built on FUNQUE+ architecture)
 
-HDR luminance clipping detection (PQ / 10-bit aware)
+- HDR luminance clipping detection (PQ / 10-bit aware)
 
-Supports MP4, YUV420 8-bit, and P010 10-bit formats
+- Supports MP4, YUV420 8-bit, and P010 10-bit formats
 
-Modular layered design (algorithm → video I/O → framework integration)
+- Modular layered design (algorithm → video I/O → framework integration)
 
-Dataset-driven batch processing
+- Dataset-driven batch processing
 
-Cross-validation pipeline for evaluation
+- Cross-validation pipeline for evaluation
 
-Parallel feature extraction using multiprocessing
+- Parallel feature extraction using multiprocessing
 
-Core HDR clipping design is layered as:
+*Core HDR clipping design is layered as:*
+
 Algorithm → Video Processing → Framework Wrapper
 
+# Project Structure
 
-##HDR_CLIPPING_CONNECTIONS
-
-#Architecture Overview
+```
 VQA_final/
 ├── funque_plus/
-│   ├── datasets/                     # Dataset definitions (HDR-VDC, BVI-HD, etc.)
+│   ├── datasets/                     # Dataset definitions (HDR_VDC, BVI-HD, etc.)
 │   ├── extract_features.py           # Extract features from one video pair
 │   ├── extract_features_from_dataset.py
 │   ├── crossval_features_on_dataset.py
@@ -63,163 +63,150 @@ VQA_final/
 │               ├── hdr_clip_test.py         # Video-level processing
 │               ├── hdr_clipping_fex.py      # Runner-compatible extractor
 │               └── luminace_detection.py    # Dataset batch script
+```
 
-##HDR Clipping Module Design
+
+# **HDR Clipping Module Design**
 
 The luminance detection module follows a clean layered architecture:
 
-1. Core Algorithm Layer (hdr_clipping.py)
+*1. Core Algorithm Layer (hdr_clipping.py)*
 
 Implements:
 
-PQ EOTF (PQ → luminance in nits)
+- PQ EOTF (PQ → luminance in nits)
 
-Thresholding of saturated pixels
+- Thresholding of saturated pixels
 
-Connected component detection (clipped blobs)
+- Connected component detection (clipped blobs)
 
-Feature computation:
+- Feature computation:
 
-Clipped area ratio
+  - Clipped area ratio
 
-Number of clipped regions
+  - Number of clipped regions
 
-Largest region size
+  - Largest region size
 
-Flatness
+  - Flatness
 
-Severity score
+  - Severity score
 
-2. Video Processing Layer (hdr_clip_test.py)
+*2. Video Processing Layer (hdr_clip_test.py)*
 
 Handles:
 
-MP4 / YUV / P010 reading
+- MP4 / YUV / P010 reading
 
-Frame iteration
+- Frame iteration
 
-Calls core algorithms per frame
+- Calls core algorithms per frame
 
-Aggregates into video-level features
+- Aggregates into video-level features
 
-3. Framework Integration Layer (hdr_clipping_fex.py)
+*3. Framework Integration Layer (hdr_clipping_fex.py)*
 
 Provides:
 
-HDRClippingFex class
+- HDRClippingFex class
 
-Compatible with qualitylib Runner interface
+- Compatible with qualitylib Runner interface
 
-Plug-and-play into FUNQUE+ pipeline
+- Plug-and-play into FUNQUE+ pipeline
 
-This design ensures:
+- This design ensures:
 
-Reusability
+  - Reusability
 
-Testability
+  - Testability
 
-Clean separation of concerns
+  - Clean separation of concerns
 
 
-##HDR_CLIPPING_CONNECTIONS
+# **HDR_CLIPPING_CONNECTIONS**
 
 Example Clipping Features Produced
 
 Per video, the system outputs metrics such as:
 
-{
+`{
   "clip_area_ratio_mean": 0.0213,
   "clip_area_ratio_p95": 0.0471,
   "clip_frames_over_thresh": 0.112,
   "clip_severity_mean": 0.338,
   "clip_severity_p95": 0.462
-}
-
+}`
 
 These are automatically integrated into the final VQA feature vector.
 
-##Installation
+# **Installation**
 
-Create a virtual environment:
+*Create a virtual environment:*
 
-python3 -m venv .venv
-source .venv/bin/activate
+`python3 -m venv .venv
+source .venv/bin/activate`
 
+*Install dependencies:*
 
-Install dependencies:
-
-pip install -r requirements.txt
-
+`pip install -r requirements.txt`
 
 (If using Colab, install system dependencies such as ffmpeg as required.)
 
-Usage
-Extract features for a single video pair
-python3 extract_features.py \
+*Usage*
+*Extract features for a single video pair*
+
+`python3 extract_features.py \
   --ref_video path/to/reference.mp4 \
   --dis_video path/to/distorted.mp4 \
-  --fex_name FUNQUE_fex
+  --fex_name FUNQUE_fex`
 
-Extract features for a full dataset
-python3 extract_features_from_dataset.py \
+*Extract features for a full dataset*
+
+`python3 extract_features_from_dataset.py \
   --dataset datasets/dataset.py \
   --fex_name FUNQUE_fex \
-  --processes 4
+  --processes 4`
 
-Cross-validation evaluation
-python3 crossval_features_on_dataset.py \
+*Cross-validation evaluation*
+
+`python3 crossval_features_on_dataset.py \
   --dataset datasets/dataset.py \
   --fex_name FUNQUE_fex \
   --splits 100 \
-  --processes 4
+  --processes 4`
 
-##Contributions Over Baseline FUNQUE+
+# **Contributions Over Baseline FUNQUE+**
 
 This project extends FUNQUE+ by adding:
 
-Explicit modeling of HDR clipping artifacts
+- Explicit modeling of HDR clipping artifacts
 
-PQ luminance-domain analysis
+- PQ luminance-domain analysis
 
-Blob-level spatial statistics
+- Blob-level spatial statistics
 
-Video-level clipping severity modeling
+- Video-level clipping severity modeling
 
-Dataset-scale luminance batch analysis (luminace_detection.py)
+- Dataset-scale luminance batch analysis (luminace_detection.py)
 
-This improves perceptual alignment for HDR content, especially in scenes with:
+- This improves perceptual alignment for HDR content, especially in scenes with:
 
-Bright skies
+  - Bright skies
 
-Specular highlights
+  - Specular highlights
 
-Fire, reflections, neon lights
+  - Fire, reflections, neon lights
 
-Overexposed HDR grading
+  - Overexposed HDR grading
 
-##Known Limitations / Future Improvements
-
-Hardcoded dimensions in some scripts (to be refactored)
-
-No unit tests yet
-
-Configuration system could be externalized (YAML/JSON)
-
-Logging could replace silent exception handling
-
-Some filename inconsistencies (e.g., luminace_detection.py typo)
-
-All identified issues and improvement points are documented.
-
-##Overall Summary
+# **Overall Summary**
 
 This project provides:
 
-A perceptually richer, HDR-aware, full-reference video quality framework
-by combining:
+- A perceptually richer, HDR-aware, full-reference video quality framework by combining:
 
-FUNQUE+ efficiency
+- FUNQUE+ efficiency
 
-Classical quality features
+- Classical quality features
 
-Explicit luminance clipping modeling
+- Explicit luminance clipping modeling
